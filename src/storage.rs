@@ -378,8 +378,8 @@ mod test {
     use protobuf;
 
     use crate::errors::{Error as RaftError, StorageError};
-    use crate::setup_for_test;
     use crate::storage::{MemStorage, Storage};
+    use crate::testing_logger;
 
     // TODO extract these duplicated utility functions for tests
 
@@ -405,7 +405,7 @@ mod test {
 
     #[test]
     fn test_storage_term() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_term"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let mut tests = vec![
             (2, Err(RaftError::Store(StorageError::Compacted))),
@@ -428,7 +428,7 @@ mod test {
 
     #[test]
     fn test_storage_entries() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_entries"));
         let ents = vec![
             new_entry(3, 3),
             new_entry(4, 4),
@@ -498,7 +498,7 @@ mod test {
 
     #[test]
     fn test_storage_last_index() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_last_index"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let storage = MemStorage::new();
         storage.wl().entries = ents;
@@ -522,7 +522,7 @@ mod test {
 
     #[test]
     fn test_storage_first_index() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_first_index"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let storage = MemStorage::new();
         storage.wl().entries = ents;
@@ -543,7 +543,7 @@ mod test {
 
     #[test]
     fn test_storage_compact() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_compact"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let mut tests = vec![
             (2, Err(RaftError::Store(StorageError::Compacted)), 3, 3, 3),
@@ -576,7 +576,7 @@ mod test {
 
     #[test]
     fn test_storage_create_snapshot() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_create_snapshot"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let nodes = vec![1, 2, 3];
         let mut cs = ConfState::new();
@@ -604,7 +604,7 @@ mod test {
 
     #[test]
     fn test_storage_append() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_append"));
         let ents = vec![new_entry(3, 3), new_entry(4, 4), new_entry(5, 5)];
         let mut tests = vec![
             (
@@ -673,7 +673,7 @@ mod test {
 
     #[test]
     fn test_storage_apply_snapshot() {
-        setup_for_test();
+        let l = testing_logger().new(o!("test" => "storage_apply_snapshot"));
         let nodes = vec![1, 2, 3];
         let data = b"data".to_vec();
 

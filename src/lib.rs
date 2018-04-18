@@ -53,7 +53,7 @@ let storage = MemStorage::default();
 config.validate().unwrap();
 // We'll use the built-in `MemStorage`, but you will likely want your own.
 // Finally, create our Raft node!
-let mut node = RawNode::new(&config, storage, vec![]).unwrap();
+let mut node = RawNode::new(&config, storage, vec![], None).unwrap();
 // We will coax it into being the lead of a single node cluster for exploration.
 node.raft.become_candidate();
 node.raft.become_leader();
@@ -68,7 +68,7 @@ channel `recv_timeout` to drive the Raft node at least every 100ms, calling
 ```rust
 # use raft::{Config, storage::MemStorage, raw_node::RawNode};
 # let config = Config { id: 1, peers: vec![1], ..Default::default() };
-# let mut node = RawNode::new(&config, MemStorage::default(), vec![]).unwrap();
+# let mut node = RawNode::new(&config, MemStorage::default(), vec![], None).unwrap();
 # node.raft.become_candidate();
 # node.raft.become_leader();
 use std::{sync::mpsc::{channel, RecvTimeoutError}, time::{Instant, Duration}};
@@ -132,7 +132,7 @@ Here is a simple example to use `propose` and `step`:
 # };
 #
 # let config = Config { id: 1, peers: vec![1], ..Default::default() };
-# let mut node = RawNode::new(&config, MemStorage::default(), vec![]).unwrap();
+# let mut node = RawNode::new(&config, MemStorage::default(), vec![], None).unwrap();
 # node.raft.become_candidate();
 # node.raft.become_leader();
 #
@@ -317,7 +317,7 @@ This means it's possible to do:
 ```rust
 use raft::{Config, storage::MemStorage, raw_node::RawNode, eraftpb::{Message, ConfChange}};
 let config = Config { id: 1, peers: vec![1, 2], ..Default::default() };
-let mut node = RawNode::new(&config, MemStorage::default(), vec![]).unwrap();
+let mut node = RawNode::new(&config, MemStorage::default(), vec![], None).unwrap();
 node.raft.become_candidate();
 node.raft.become_leader();
 
@@ -371,7 +371,7 @@ before taking old, removed peers offline.
 extern crate fail;
 
 #[macro_use]
-extern crate log;
+extern crate slog;
 #[macro_use]
 extern crate quick_error;
 #[macro_use]
@@ -405,6 +405,7 @@ pub use self::raw_node::{is_empty_snap, Peer, RawNode, Ready, SnapshotStatus};
 pub use self::read_only::{ReadOnlyOption, ReadState};
 pub use self::status::Status;
 pub use self::storage::{RaftState, Storage};
+use slog::{Drain, Logger};
 
 pub mod prelude {
     //! A "prelude" for crates using the `raft` crate.
@@ -438,8 +439,72 @@ pub mod prelude {
     pub use crate::read_only::{ReadOnlyOption, ReadState};
 }
 
-/// Do any common test initialization. Eg set up logging, setup fail-rs.
-#[cfg(test)]
-fn setup_for_test() {
-    let _ = env_logger::try_init();
+/// Build a logger for tests.
+///
+/// Currently, this is a terminal log. It ensures it is only initialized once to prevent clobbering.
+// This is `pub` so that testing and benching functions can use it.
+// `#[cfg(test)]` doesn't work for benching.
+//
+// TODO: Investigate reporting strategies. Tests are run multithreaded in general, and we'd like to be able to sort through and understand test results.
+#[doc(hidden)]
+pub fn testing_logger() -> &'static Logger {
+    use std::sync::Once;
+    static LOGGER_INITIALIZED: Once = Once::new();
+    static mut LOGGER: Option<Logger> = None;
+
+    unsafe {
+        LOGGER_INITIALIZED.call_once(|| {
+            let decorator = slog_term::TermDecorator::new().build();
+            let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+            let drain = slog_envlogger::new(drain).fuse();
+            let drain = slog_async::Async::new(drain)
+                .chan_size(4096)
+                .overflow_strategy(slog_async::OverflowStrategy::Block)
+                .build()
+                .fuse();
+            LOGGER = Some(slog::Logger::root(drain, o!()));
+        });
+        LOGGER.as_ref().unwrap()
+    }
+}
+
+/// The default logger we fall back to when passed `None` in external facing constructors.
+///
+/// Currently, this is a `log` adaptor behind a `Once` to ensure there is no clobbering.
+#[doc(hidden)]
+fn default_logger() -> &'static Logger {
+    use std::sync::Once;
+    static LOGGER_INITIALIZED: Once = Once::new();
+    static mut LOGGER: Option<Logger> = None;
+
+    unsafe {
+        LOGGER_INITIALIZED.call_once(|| {
+            let drain = slog_stdlog::StdLog.fuse();
+            let drain = slog_envlogger::new(drain).fuse();
+            let drain = slog_async::Async::new(drain)
+                .chan_size(4096)
+                .overflow_strategy(slog_async::OverflowStrategy::Block)
+                .build()
+                .fuse();
+            LOGGER = Some(slog::Logger::root(drain, o!()));
+        });
+        LOGGER.as_ref().unwrap()
+    }
+}
+
+/// The discard logger is used in `Default::default` implementations.
+///
+/// Currently, this is a `log` adaptor.
+#[doc(hidden)]
+fn discard_logger() -> &'static Logger {
+    use std::sync::Once;
+    static LOGGER_INITIALIZED: Once = Once::new();
+    static mut LOGGER: Option<Logger> = None;
+
+    unsafe {
+        LOGGER_INITIALIZED.call_once(|| {
+            LOGGER = Some(Logger::root(slog::Discard, o!()));
+        });
+        LOGGER.as_ref().unwrap()
+    }
 }

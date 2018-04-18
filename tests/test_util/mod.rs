@@ -25,19 +25,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use env_logger;
 use protobuf::RepeatedField;
 use raft::eraftpb::*;
 use raft::storage::MemStorage;
 use raft::*;
 use rand;
+use slog::Logger;
 use std::collections::HashMap;
 use std::ops::*;
-
-/// Do any common test initialization. Eg set up logging, setup fail-rs.
-pub fn setup_for_test() {
-    let _ = env_logger::try_init();
-}
 
 pub fn ltoa(raft_log: &RaftLog<MemStorage>) -> String {
     let mut s = format!("committed: {}\n", raft_log.committed);
@@ -106,9 +101,11 @@ impl Interface {
         if self.raft.is_some() {
             self.id = id;
             let prs = self.take_prs();
+            let logger = self.raft.as_ref().unwrap().logger.clone();
             self.set_prs(ProgressSet::with_capacity(
                 ids.len(),
                 prs.learner_ids().len(),
+                &logger,
             ));
             for id in ids {
                 let progress = Progress::new(0, 256);
@@ -145,8 +142,9 @@ pub fn new_test_raft(
     election: usize,
     heartbeat: usize,
     storage: MemStorage,
+    l: &Logger,
 ) -> Interface {
-    Interface::new(Raft::new(&new_test_config(id, peers, election, heartbeat), storage).unwrap())
+    Interface::new(Raft::new(&new_test_config(id, peers, election, heartbeat), storage, l).unwrap())
 }
 
 pub fn new_test_raft_with_prevote(
@@ -156,15 +154,16 @@ pub fn new_test_raft_with_prevote(
     heartbeat: usize,
     storage: MemStorage,
     pre_vote: bool,
+    l: &Logger,
 ) -> Interface {
     let mut config = new_test_config(id, peers, election, heartbeat);
     config.pre_vote = pre_vote;
     config.tag = format!("{}", id);
-    new_test_raft_with_config(&config, storage)
+    new_test_raft_with_config(&config, storage, l)
 }
 
-pub fn new_test_raft_with_config(config: &Config, storage: MemStorage) -> Interface {
-    Interface::new(Raft::new(config, storage).unwrap())
+pub fn new_test_raft_with_config(config: &Config, storage: MemStorage, l: &Logger) -> Interface {
+    Interface::new(Raft::new(config, storage, l).unwrap())
 }
 
 pub fn hard_state(t: u64, c: u64, v: u64) -> HardState {
@@ -244,13 +243,17 @@ impl Network {
     // A nil node will be replaced with a new *stateMachine.
     // A *stateMachine will get its k, id.
     // When using stateMachine, the address list is always [1, n].
-    pub fn new(peers: Vec<Option<Interface>>) -> Network {
-        Network::new_with_config(peers, false)
+    pub fn new(peers: Vec<Option<Interface>>, l: &Logger) -> Network {
+        Network::new_with_config(peers, false, l)
     }
 
     // new_with_config is like new but sets the configuration pre_vote explicitly
     // for any state machines it creates.
-    pub fn new_with_config(mut peers: Vec<Option<Interface>>, pre_vote: bool) -> Network {
+    pub fn new_with_config(
+        mut peers: Vec<Option<Interface>>,
+        pre_vote: bool,
+        l: &Logger,
+    ) -> Network {
         let size = peers.len();
         let peer_addrs: Vec<u64> = (1..=size as u64).collect();
         let mut nstorage = HashMap::new();
@@ -266,6 +269,7 @@ impl Network {
                         1,
                         nstorage[&id].clone(),
                         pre_vote,
+                        l,
                     );
                     npeers.insert(id, r);
                 }

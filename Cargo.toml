@@ -17,16 +17,19 @@ default = []
 failpoint = ["fail"]
 
 [dependencies]
-log = ">0.2"
+slog = "2.2"
 protobuf = "~2.0-2.2"
 quick-error = "1.2.2"
 rand = "0.5.4"
 hashbrown = "0.1"
 fail = { version = "0.2", optional = true }
 getset = "0.0.6"
+slog-async = "2.3.0"
+slog-stdlog = "3.0.2"
+slog-term = "2.4.0"
+slog-envlogger = "2.1.0"
 
 [dev-dependencies]
-env_logger = "0.5"
 criterion = ">0.2.4"
 lazy_static = "1.0"
 regex = "1.1"
