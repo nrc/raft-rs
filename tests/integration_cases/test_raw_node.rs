@@ -25,11 +25,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::test_util::*;
 use protobuf::{self, ProtobufEnum};
 use raft::eraftpb::*;
 use raft::storage::MemStorage;
 use raft::*;
-use test_util::*;
 
 fn new_peer(id: u64) -> Peer {
     Peer {
