@@ -22,6 +22,10 @@ impl Entry {
         self.term = v;
     }
     #[inline]
+    pub fn get_term(&self) -> u64 {
+        self.term
+    }
+    #[inline]
     pub fn clear_index(&mut self) {
         self.index = 0
     }
@@ -30,12 +34,20 @@ impl Entry {
         self.index = v;
     }
     #[inline]
+    pub fn get_index(&self) -> u64 {
+        self.index
+    }
+    #[inline]
     pub fn clear_data(&mut self) {
         self.data.clear();
     }
     #[inline]
     pub fn set_data(&mut self, v: std::vec::Vec<u8>) {
         self.data = v;
+    }
+    #[inline]
+    pub fn get_data(&self) -> &[u8] {
+        &self.data
     }
     #[inline]
     pub fn mut_data(&mut self) -> &mut std::vec::Vec<u8> {
@@ -54,6 +66,10 @@ impl Entry {
         self.context = v;
     }
     #[inline]
+    pub fn get_context(&self) -> &[u8] {
+        &self.context
+    }
+    #[inline]
     pub fn mut_context(&mut self) -> &mut std::vec::Vec<u8> {
         &mut self.context
     }
@@ -68,6 +84,10 @@ impl Entry {
     #[inline]
     pub fn set_sync_log(&mut self, v: bool) {
         self.sync_log = v;
+    }
+    #[inline]
+    pub fn get_sync_log(&self) -> bool {
+        self.sync_log
     }
 }
 impl ::protobuf::Clear for Entry {
@@ -168,46 +188,6 @@ impl SnapshotMetadata {
         self.conf_state.take().unwrap_or_else(ConfState::default)
     }
     #[inline]
-    pub fn has_pending_membership_change(&self) -> bool {
-        self.pending_membership_change.is_some()
-    }
-    #[inline]
-    pub fn clear_pending_membership_change(&mut self) {
-        self.pending_membership_change = ::std::option::Option::None
-    }
-    #[inline]
-    pub fn set_pending_membership_change(&mut self, v: ConfState) {
-        self.pending_membership_change = ::std::option::Option::Some(v);
-    }
-    #[inline]
-    pub fn get_pending_membership_change(&self) -> &ConfState {
-        match self.pending_membership_change.as_ref() {
-            Some(v) => v,
-            None => <ConfState as ::protobuf::Message>::default_instance(),
-        }
-    }
-    #[inline]
-    pub fn mut_pending_membership_change(&mut self) -> &mut ConfState {
-        if self.pending_membership_change.is_none() {
-            self.pending_membership_change = ::std::option::Option::Some(ConfState::default());
-        }
-        self.pending_membership_change.as_mut().unwrap()
-    }
-    #[inline]
-    pub fn take_pending_membership_change(&mut self) -> ConfState {
-        self.pending_membership_change
-            .take()
-            .unwrap_or_else(ConfState::default)
-    }
-    #[inline]
-    pub fn clear_pending_membership_change_index(&mut self) {
-        self.pending_membership_change_index = 0
-    }
-    #[inline]
-    pub fn set_pending_membership_change_index(&mut self, v: u64) {
-        self.pending_membership_change_index = v;
-    }
-    #[inline]
     pub fn clear_index(&mut self) {
         self.index = 0
     }
@@ -216,12 +196,20 @@ impl SnapshotMetadata {
         self.index = v;
     }
     #[inline]
+    pub fn get_index(&self) -> u64 {
+        self.index
+    }
+    #[inline]
     pub fn clear_term(&mut self) {
         self.term = 0
     }
     #[inline]
     pub fn set_term(&mut self, v: u64) {
         self.term = v;
+    }
+    #[inline]
+    pub fn get_term(&self) -> u64 {
+        self.term
     }
 }
 impl ::protobuf::Clear for SnapshotMetadata {
@@ -298,6 +286,10 @@ impl Snapshot {
     #[inline]
     pub fn set_data(&mut self, v: std::vec::Vec<u8>) {
         self.data = v;
+    }
+    #[inline]
+    pub fn get_data(&self) -> &[u8] {
+        &self.data
     }
     #[inline]
     pub fn mut_data(&mut self) -> &mut std::vec::Vec<u8> {
@@ -428,12 +420,20 @@ impl Message {
         self.to = v;
     }
     #[inline]
+    pub fn get_to(&self) -> u64 {
+        self.to
+    }
+    #[inline]
     pub fn clear_from(&mut self) {
         self.from = 0
     }
     #[inline]
     pub fn set_from(&mut self, v: u64) {
         self.from = v;
+    }
+    #[inline]
+    pub fn get_from(&self) -> u64 {
+        self.from
     }
     #[inline]
     pub fn clear_term(&mut self) {
@@ -444,12 +444,20 @@ impl Message {
         self.term = v;
     }
     #[inline]
+    pub fn get_term(&self) -> u64 {
+        self.term
+    }
+    #[inline]
     pub fn clear_log_term(&mut self) {
         self.log_term = 0
     }
     #[inline]
     pub fn set_log_term(&mut self, v: u64) {
         self.log_term = v;
+    }
+    #[inline]
+    pub fn get_log_term(&self) -> u64 {
+        self.log_term
     }
     #[inline]
     pub fn clear_index(&mut self) {
@@ -460,12 +468,20 @@ impl Message {
         self.index = v;
     }
     #[inline]
+    pub fn get_index(&self) -> u64 {
+        self.index
+    }
+    #[inline]
     pub fn clear_entries(&mut self) {
         self.entries.clear();
     }
     #[inline]
     pub fn set_entries(&mut self, v: ::std::vec::Vec<Entry>) {
         self.entries = v;
+    }
+    #[inline]
+    pub fn get_entries(&self) -> &::std::vec::Vec<Entry> {
+        &self.entries
     }
     #[inline]
     pub fn mut_entries(&mut self) -> &mut ::std::vec::Vec<Entry> {
@@ -482,6 +498,10 @@ impl Message {
     #[inline]
     pub fn set_commit(&mut self, v: u64) {
         self.commit = v;
+    }
+    #[inline]
+    pub fn get_commit(&self) -> u64 {
+        self.commit
     }
     #[inline]
     pub fn has_snapshot(&self) -> bool {
@@ -522,6 +542,10 @@ impl Message {
         self.reject = v;
     }
     #[inline]
+    pub fn get_reject(&self) -> bool {
+        self.reject
+    }
+    #[inline]
     pub fn clear_reject_hint(&mut self) {
         self.reject_hint = 0
     }
@@ -530,12 +554,20 @@ impl Message {
         self.reject_hint = v;
     }
     #[inline]
+    pub fn get_reject_hint(&self) -> u64 {
+        self.reject_hint
+    }
+    #[inline]
     pub fn clear_context(&mut self) {
         self.context.clear();
     }
     #[inline]
     pub fn set_context(&mut self, v: std::vec::Vec<u8>) {
         self.context = v;
+    }
+    #[inline]
+    pub fn get_context(&self) -> &[u8] {
+        &self.context
     }
     #[inline]
     pub fn mut_context(&mut self) -> &mut std::vec::Vec<u8> {
@@ -622,6 +654,10 @@ impl HardState {
         self.term = v;
     }
     #[inline]
+    pub fn get_term(&self) -> u64 {
+        self.term
+    }
+    #[inline]
     pub fn clear_vote(&mut self) {
         self.vote = 0
     }
@@ -630,12 +666,20 @@ impl HardState {
         self.vote = v;
     }
     #[inline]
+    pub fn get_vote(&self) -> u64 {
+        self.vote
+    }
+    #[inline]
     pub fn clear_commit(&mut self) {
         self.commit = 0
     }
     #[inline]
     pub fn set_commit(&mut self, v: u64) {
         self.commit = v;
+    }
+    #[inline]
+    pub fn get_commit(&self) -> u64 {
+        self.commit
     }
 }
 impl ::protobuf::Clear for HardState {
@@ -714,6 +758,10 @@ impl ConfState {
         self.nodes = v;
     }
     #[inline]
+    pub fn get_nodes(&self) -> &::std::vec::Vec<u64> {
+        &self.nodes
+    }
+    #[inline]
     pub fn mut_nodes(&mut self) -> &mut ::std::vec::Vec<u64> {
         &mut self.nodes
     }
@@ -728,6 +776,10 @@ impl ConfState {
     #[inline]
     pub fn set_learners(&mut self, v: ::std::vec::Vec<u64>) {
         self.learners = v;
+    }
+    #[inline]
+    pub fn get_learners(&self) -> &::std::vec::Vec<u64> {
+        &self.learners
     }
     #[inline]
     pub fn mut_learners(&mut self) -> &mut ::std::vec::Vec<u64> {
@@ -814,6 +866,10 @@ impl ConfChange {
         self.id = v;
     }
     #[inline]
+    pub fn get_id(&self) -> u64 {
+        self.id
+    }
+    #[inline]
     pub fn clear_change_type(&mut self) {
         self.change_type = 0
     }
@@ -834,6 +890,10 @@ impl ConfChange {
         self.node_id = v;
     }
     #[inline]
+    pub fn get_node_id(&self) -> u64 {
+        self.node_id
+    }
+    #[inline]
     pub fn clear_context(&mut self) {
         self.context.clear();
     }
@@ -842,50 +902,16 @@ impl ConfChange {
         self.context = v;
     }
     #[inline]
+    pub fn get_context(&self) -> &[u8] {
+        &self.context
+    }
+    #[inline]
     pub fn mut_context(&mut self) -> &mut std::vec::Vec<u8> {
         &mut self.context
     }
     #[inline]
     pub fn take_context(&mut self) -> std::vec::Vec<u8> {
         ::std::mem::replace(&mut self.context, ::std::vec::Vec::new())
-    }
-    #[inline]
-    pub fn has_configuration(&self) -> bool {
-        self.configuration.is_some()
-    }
-    #[inline]
-    pub fn clear_configuration(&mut self) {
-        self.configuration = ::std::option::Option::None
-    }
-    #[inline]
-    pub fn set_configuration(&mut self, v: ConfState) {
-        self.configuration = ::std::option::Option::Some(v);
-    }
-    #[inline]
-    pub fn get_configuration(&self) -> &ConfState {
-        match self.configuration.as_ref() {
-            Some(v) => v,
-            None => <ConfState as ::protobuf::Message>::default_instance(),
-        }
-    }
-    #[inline]
-    pub fn mut_configuration(&mut self) -> &mut ConfState {
-        if self.configuration.is_none() {
-            self.configuration = ::std::option::Option::Some(ConfState::default());
-        }
-        self.configuration.as_mut().unwrap()
-    }
-    #[inline]
-    pub fn take_configuration(&mut self) -> ConfState {
-        self.configuration.take().unwrap_or_else(ConfState::default)
-    }
-    #[inline]
-    pub fn clear_start_index(&mut self) {
-        self.start_index = 0
-    }
-    #[inline]
-    pub fn set_start_index(&mut self, v: u64) {
-        self.start_index = v;
     }
 }
 impl ::protobuf::Clear for ConfChange {
@@ -992,8 +1018,6 @@ impl ConfChangeType {
             ConfChangeType::AddNode,
             ConfChangeType::RemoveNode,
             ConfChangeType::AddLearnerNode,
-            ConfChangeType::BeginMembershipChange,
-            ConfChangeType::FinalizeMembershipChange,
         ];
         VALUES
     }

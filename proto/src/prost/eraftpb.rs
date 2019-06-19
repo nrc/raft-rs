@@ -29,10 +29,6 @@ pub struct Entry {
 pub struct SnapshotMetadata {
     #[prost(message, optional, tag = "1")]
     pub conf_state: ::std::option::Option<ConfState>,
-    #[prost(message, optional, tag = "4")]
-    pub pending_membership_change: ::std::option::Option<ConfState>,
-    #[prost(uint64, tag = "5")]
-    pub pending_membership_change_index: u64,
     #[prost(uint64, tag = "2")]
     pub index: u64,
     #[prost(uint64, tag = "3")]
@@ -94,19 +90,10 @@ pub struct ConfChange {
     pub id: u64,
     #[prost(enumeration = "ConfChangeType", tag = "2")]
     pub change_type: i32,
-    /// Used in `AddNode`, `RemoveNode`, and `AddLearnerNode`.
     #[prost(uint64, tag = "3")]
     pub node_id: u64,
     #[prost(bytes, tag = "4")]
     pub context: std::vec::Vec<u8>,
-    /// Used in `BeginMembershipChange` and `FinalizeMembershipChange`.
-    #[prost(message, optional, tag = "5")]
-    pub configuration: ::std::option::Option<ConfState>,
-    /// Used in `BeginMembershipChange` and `FinalizeMembershipChange`.
-    /// Because `RawNode::apply_conf_change` takes a `ConfChange` instead of an `Entry` we must
-    /// include this index so it can be known.
-    #[prost(uint64, tag = "6")]
-    pub start_index: u64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -143,6 +130,4 @@ pub enum ConfChangeType {
     AddNode = 0,
     RemoveNode = 1,
     AddLearnerNode = 2,
-    BeginMembershipChange = 3,
-    FinalizeMembershipChange = 4,
 }
