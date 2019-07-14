@@ -48,7 +48,8 @@ fn main() {
             | GenOpt::TRIVIAL_SET
             | GenOpt::HAS
             | GenOpt::TAKE
-            | GenOpt::CLEAR,
+            | GenOpt::CLEAR
+            | GenOpt::MESSAGE,
     );
     generate_prost_rs(&mod_names);
 }

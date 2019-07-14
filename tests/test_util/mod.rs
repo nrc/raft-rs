@@ -350,10 +350,3 @@ impl Network {
         self.ignorem = HashMap::new();
     }
 }
-
-#[inline]
-pub fn write_to_bytes(msg: &impl ::prost::Message) -> Result<Vec<u8>> {
-    let mut buf = Vec::with_capacity(msg.encoded_len());
-    msg.encode(&mut buf)?;
-    Ok(buf)
-}

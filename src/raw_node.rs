@@ -208,8 +208,8 @@ impl<T: Storage> RawNode<T> {
                 if let Some(ctx) = peer.context.take() {
                     cc.set_context(ctx);
                 }
-                let mut data = Vec::with_capacity(cc.encoded_len());
-                cc.encode(&mut data).expect("unexpected marshal error");
+                let data =
+                    protobuf::Message::write_to_bytes(&cc).expect("unexpected marshal error");
                 let mut e = Entry::default();
                 e.set_entry_type(EntryType::EntryConfChange);
                 e.set_term(1);

@@ -3133,7 +3133,7 @@ fn test_commit_after_remove_node() {
     let mut cc = ConfChange::default();
     cc.set_change_type(ConfChangeType::RemoveNode);
     cc.set_node_id(2);
-    e.set_data(write_to_bytes(&cc).unwrap());
+    e.set_data(protobuf::write_to_bytes(&cc).unwrap());
     m.mut_entries().push(e);
     r.step(m).expect("");
     // Stabilize the log and make sure nothing is committed yet.
@@ -4135,7 +4135,7 @@ fn test_conf_change_check_before_campaign() {
     let mut cc = ConfChange::default();
     cc.set_change_type(ConfChangeType::RemoveNode);
     cc.set_node_id(3);
-    e.set_data(write_to_bytes(&cc).unwrap());
+    e.set_data(protobuf::write_to_bytes(&cc).unwrap());
     m.mut_entries().push(e);
     nt.send(vec![m]);
 

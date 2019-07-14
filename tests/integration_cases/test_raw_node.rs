@@ -194,7 +194,7 @@ fn test_raw_node_propose_and_conf_change() {
             raw_node.propose(vec![], b"somedata".to_vec()).expect("");
 
             let cc = conf_change(ConfChangeType::AddNode, 1);
-            ccdata = write_to_bytes(&cc).unwrap();
+            ccdata = protobuf::write_to_bytes(&cc).unwrap();
             raw_node.propose_conf_change(vec![], cc).expect("");
 
             proposed = true;
@@ -252,7 +252,7 @@ fn test_raw_node_propose_add_duplicate_node() {
     };
 
     let cc1 = conf_change(ConfChangeType::AddNode, 1);
-    let ccdata1 = write_to_bytes(&cc1).unwrap();
+    let ccdata1 = protobuf::write_to_bytes(&cc1).unwrap();
     propose_conf_change_and_apply(cc1.clone());
 
     // try to add the same node again
@@ -260,7 +260,7 @@ fn test_raw_node_propose_add_duplicate_node() {
 
     // the new node join should be ok
     let cc2 = conf_change(ConfChangeType::AddNode, 2);
-    let ccdata2 = write_to_bytes(&cc2).unwrap();
+    let ccdata2 = protobuf::write_to_bytes(&cc2).unwrap();
     propose_conf_change_and_apply(cc2);
 
     let last_index = s.last_index().unwrap();
@@ -365,7 +365,7 @@ fn test_raw_node_read_index() {
 fn test_raw_node_start() {
     setup_for_test();
     let cc = conf_change(ConfChangeType::AddNode, 1);
-    let ccdata = write_to_bytes(&cc).unwrap();
+    let ccdata = protobuf::write_to_bytes(&cc).unwrap();
     let wants = vec![
         new_ready(
             None,
