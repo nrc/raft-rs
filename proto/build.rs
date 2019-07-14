@@ -52,6 +52,11 @@ fn main() {
             | GenOpt::MESSAGE,
     );
     generate_prost_rs(&mod_names);
+
+    // Generate rust-protobuf output
+    generate_protobuf_files(&file_names, "src/protobuf");
+    replace_read_unknown_fields(&file_names);
+    generate_lib_file(&mod_names);
 }
 
 fn generate_prost_rs(mod_names: &[String]) {
@@ -76,4 +81,18 @@ fn generate_prost_rs(mod_names: &[String]) {
     let mut lib = File::create("src/prost.rs").expect("Could not create prost.rs");
     lib.write_all(text.as_bytes())
         .expect("Could not write prost.rs");
+}
+
+fn generate_lib_file<T: AsRef<str>>(mod_names: &[T]) {
+    let mut text = String::new();
+
+    for mod_name in mod_names {
+        text.push_str("#[rustfmt::skip]\npub mod ");
+        text.push_str(mod_name.as_ref());
+        text.push_str(";\n");
+    }
+
+    let mut lib = File::create("src/protobuf.rs").expect("Could not create protobuf.rs");
+    lib.write_all(text.as_bytes())
+        .expect("Could not write protobuf.rs");
 }
