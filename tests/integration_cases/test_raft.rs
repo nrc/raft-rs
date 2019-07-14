@@ -323,7 +323,7 @@ fn test_progress_paused() {
     m.set_msg_type(MessageType::MsgPropose);
     let mut e = Entry::default();
     e.set_data(b"some_data".to_vec());
-    m.set_entries(vec![e]);
+    m.set_entries(vec![e].into());
     raft.step(m.clone()).expect("");
     raft.step(m.clone()).expect("");
     raft.step(m.clone()).expect("");
@@ -909,7 +909,7 @@ fn test_candidate_concede() {
     // send a proposal to 3 to flush out a MsgAppend to 1
     let data = "force follower";
     let mut m = new_message(3, 3, MessageType::MsgPropose, 0);
-    m.set_entries(vec![new_entry(0, 0, Some(data))]);
+    m.set_entries(vec![new_entry(0, 0, Some(data))].into());
     tt.send(vec![m]);
     // send heartbeat; flush out commit
     tt.send(vec![new_message(3, 3, MessageType::MsgBeat, 0)]);
@@ -956,7 +956,7 @@ fn test_old_messages() {
     // pretend we're an old leader trying to make progress; this entry is expected to be ignored.
     let mut m = new_message(2, 1, MessageType::MsgAppend, 0);
     m.set_term(2);
-    m.set_entries(vec![empty_entry(2, 3)]);
+    m.set_entries(vec![empty_entry(2, 3)].into());
     tt.send(vec![m]);
     // commit a new entry
     tt.send(vec![new_message(1, 1, MessageType::MsgPropose, 1)]);
@@ -1410,7 +1410,7 @@ fn test_msg_append_response_wait_reset() {
 
     // A new command is now proposed on node 1.
     m = new_message(1, 0, MessageType::MsgPropose, 0);
-    m.set_entries(vec![empty_entry(0, 0)]);
+    m.set_entries(vec![empty_entry(0, 0)].into());
     sm.step(m).expect("");
 
     // The command is broadcast to all nodes not in the wait state.
@@ -2801,8 +2801,8 @@ fn test_restore() {
         s.get_metadata().get_term()
     );
     assert_eq!(
-        &sm.prs().nodes(),
-        s.get_metadata().get_conf_state().get_nodes()
+        AsRef::<[u64]>::as_ref(&*sm.prs().nodes()),
+        AsRef::<[u64]>::as_ref(&*s.get_metadata().get_conf_state().get_nodes()),
     );
     assert!(!sm.restore(s));
 }
@@ -3133,7 +3133,7 @@ fn test_commit_after_remove_node() {
     let mut cc = ConfChange::default();
     cc.set_change_type(ConfChangeType::RemoveNode);
     cc.set_node_id(2);
-    e.set_data(protobuf::write_to_bytes(&cc).unwrap());
+    e.set_data(protobuf::Message::write_to_bytes(&cc).unwrap());
     m.mut_entries().push(e);
     r.step(m).expect("");
     // Stabilize the log and make sure nothing is committed yet.
@@ -4135,7 +4135,7 @@ fn test_conf_change_check_before_campaign() {
     let mut cc = ConfChange::default();
     cc.set_change_type(ConfChangeType::RemoveNode);
     cc.set_node_id(3);
-    e.set_data(protobuf::write_to_bytes(&cc).unwrap());
+    e.set_data(protobuf::Message::write_to_bytes(&cc).unwrap());
     m.mut_entries().push(e);
     nt.send(vec![m]);
 

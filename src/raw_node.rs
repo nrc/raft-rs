@@ -36,7 +36,8 @@ use crate::eraftpb::{
     ConfChange, ConfChangeType, ConfState, Entry, EntryType, HardState, Message, MessageType,
     Snapshot,
 };
-use prost::Message as ProstMsg;
+
+use protobuf::Message as ProtoMessage;
 
 use super::config::Config;
 use super::errors::{Error, Result};
@@ -208,8 +209,7 @@ impl<T: Storage> RawNode<T> {
                 if let Some(ctx) = peer.context.take() {
                     cc.set_context(ctx);
                 }
-                let data =
-                    protobuf::Message::write_to_bytes(&cc).expect("unexpected marshal error");
+                let data = ProtoMessage::write_to_bytes(&cc).expect("unexpected marshal error");
                 let mut e = Entry::default();
                 e.set_entry_type(EntryType::EntryConfChange);
                 e.set_term(1);
@@ -282,7 +282,7 @@ impl<T: Storage> RawNode<T> {
         let mut e = Entry::default();
         e.set_data(data);
         e.set_context(context);
-        m.set_entries(vec![e]);
+        m.set_entries(vec![e].into());
         self.raft.step(m)
     }
 
@@ -296,15 +296,14 @@ impl<T: Storage> RawNode<T> {
     /// ProposeConfChange proposes a config change.
     #[cfg_attr(feature = "cargo-clippy", allow(clippy::needless_pass_by_value))]
     pub fn propose_conf_change(&mut self, context: Vec<u8>, cc: ConfChange) -> Result<()> {
-        let mut data = Vec::with_capacity(ProstMsg::encoded_len(&cc));
-        cc.encode(&mut data)?;
+        let data = cc.write_to_bytes()?;
         let mut m = Message::default();
         m.set_msg_type(MessageType::MsgPropose);
         let mut e = Entry::default();
         e.set_entry_type(EntryType::EntryConfChange);
         e.set_data(data);
         e.set_context(context);
-        m.set_entries(vec![e]);
+        m.set_entries(vec![e].into());
         self.raft.step(m)
     }
 
@@ -481,7 +480,7 @@ impl<T: Storage> RawNode<T> {
         m.set_msg_type(MessageType::MsgReadIndex);
         let mut e = Entry::default();
         e.set_data(rctx);
-        m.set_entries(vec![e]);
+        m.set_entries(vec![e].into());
         let _ = self.raft.step(m);
     }
 

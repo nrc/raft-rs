@@ -26,7 +26,9 @@
 // limitations under the License.
 
 use crate::test_util::*;
-use prost::Message as ProstMsg;
+use protobuf::Message;
+#[cfg(feature = "protobuf-codec")]
+use protobuf::ProtobufEnum;
 use raft::eraftpb::*;
 use raft::storage::MemStorage;
 use raft::*;
@@ -194,7 +196,7 @@ fn test_raw_node_propose_and_conf_change() {
             raw_node.propose(vec![], b"somedata".to_vec()).expect("");
 
             let cc = conf_change(ConfChangeType::AddNode, 1);
-            ccdata = protobuf::write_to_bytes(&cc).unwrap();
+            ccdata = protobuf::Message::write_to_bytes(&cc).unwrap();
             raw_node.propose_conf_change(vec![], cc).expect("");
 
             proposed = true;
@@ -244,7 +246,8 @@ fn test_raw_node_propose_add_duplicate_node() {
         s.wl().append(&rd.entries).expect("");
         for e in rd.committed_entries.as_ref().unwrap() {
             if e.get_entry_type() == EntryType::EntryConfChange {
-                let conf_change = ConfChange::decode(e.get_data()).unwrap();
+                let mut conf_change = ConfChange::default();
+                conf_change.merge_from_bytes(e.get_data()).unwrap();
                 raw_node.apply_conf_change(&conf_change);
             }
         }
@@ -252,7 +255,7 @@ fn test_raw_node_propose_add_duplicate_node() {
     };
 
     let cc1 = conf_change(ConfChangeType::AddNode, 1);
-    let ccdata1 = protobuf::write_to_bytes(&cc1).unwrap();
+    let ccdata1 = protobuf::Message::write_to_bytes(&cc1).unwrap();
     propose_conf_change_and_apply(cc1.clone());
 
     // try to add the same node again
@@ -260,7 +263,7 @@ fn test_raw_node_propose_add_duplicate_node() {
 
     // the new node join should be ok
     let cc2 = conf_change(ConfChangeType::AddNode, 2);
-    let ccdata2 = protobuf::write_to_bytes(&cc2).unwrap();
+    let ccdata2 = protobuf::Message::write_to_bytes(&cc2).unwrap();
     propose_conf_change_and_apply(cc2);
 
     let last_index = s.last_index().unwrap();
@@ -305,7 +308,8 @@ fn test_raw_node_propose_add_learner_node() {
     );
 
     let e = &rd.committed_entries.as_ref().unwrap()[0];
-    let conf_change = ConfChange::decode(e.get_data()).unwrap();
+    let mut conf_change = ConfChange::default();
+    conf_change.merge_from_bytes(e.get_data()).unwrap();
     let conf_state = raw_node.apply_conf_change(&conf_change);
     assert_eq!(conf_state.nodes, vec![1]);
     assert_eq!(conf_state.learners, vec![2]);
@@ -365,7 +369,7 @@ fn test_raw_node_read_index() {
 fn test_raw_node_start() {
     setup_for_test();
     let cc = conf_change(ConfChangeType::AddNode, 1);
-    let ccdata = protobuf::write_to_bytes(&cc).unwrap();
+    let ccdata = protobuf::Message::write_to_bytes(&cc).unwrap();
     let wants = vec![
         new_ready(
             None,

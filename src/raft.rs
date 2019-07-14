@@ -502,7 +502,7 @@ impl<T: Storage> Raft<T> {
         m.set_msg_type(MessageType::MsgAppend);
         m.set_index(pr.next_idx - 1);
         m.set_log_term(term);
-        m.set_entries(ents);
+        m.set_entries(ents.into());
         m.set_commit(self.raft_log.committed);
         if !m.get_entries().is_empty() {
             match pr.state {
@@ -1027,7 +1027,7 @@ impl<T: Storage> Raft<T> {
                     // ...we haven't voted and we don't think there's a leader yet in this term...
                     (self.vote == INVALID_ID && self.leader_id == INVALID_ID) ||
                     // ...or this is a PreVote for a future term...
-                    (m.msg_type == (MessageType::MsgRequestPreVote as i32) && m.get_term() > self.term);
+                    (m.get_msg_type() == MessageType::MsgRequestPreVote && m.get_term() > self.term);
                 // ...and we believe the candidate is up to date.
                 if can_vote && self.raft_log.is_up_to_date(m.get_index(), m.get_log_term()) {
                     // When responding to Msg{Pre,}Vote messages we include the term

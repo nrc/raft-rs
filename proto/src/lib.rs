@@ -5,10 +5,10 @@ pub use crate::prost::eraftpb;
 #[cfg(feature = "protobuf-codec")]
 pub use crate::protobuf::eraftpb;
 
-#[cfg(feature = "protobuf-codec")]
-mod protobuf;
 #[cfg(feature = "prost-codec")]
 mod prost;
+#[cfg(feature = "protobuf-codec")]
+mod protobuf;
 
 pub mod prelude {
     pub use crate::eraftpb::{

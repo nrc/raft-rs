@@ -494,7 +494,7 @@ mod test {
     use crate::raft_log::{self, RaftLog};
     use crate::setup_for_test;
     use crate::storage::MemStorage;
-    use prost::Message as ProstMsg;
+    use protobuf::Message;
 
     fn new_raft_log(s: MemStorage) -> RaftLog<MemStorage> {
         RaftLog::new(s, String::from(""))
@@ -957,7 +957,7 @@ mod test {
         let (offset, num) = (100u64, 100u64);
         let (last, half) = (offset + num, offset + num / 2);
         let halfe = new_entry(half, half);
-        let halfe_size = ProstMsg::encoded_len(&halfe) as u64;
+        let halfe_size = Message::compute_size(&halfe) as u64;
 
         let store = MemStorage::new();
         store

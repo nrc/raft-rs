@@ -342,7 +342,7 @@ mod test {
     use crate::errors::{Error as RaftError, StorageError};
     use crate::setup_for_test;
     use crate::storage::{MemStorage, Storage};
-    use prost::Message as ProstMsg;
+    use protobuf::Message;
 
     // TODO extract these duplicated utility functions for tests
 
@@ -353,8 +353,8 @@ mod test {
         e
     }
 
-    fn size_of<T: ProstMsg>(m: &T) -> u32 {
-        ProstMsg::encoded_len(m) as u32
+    fn size_of<T: Message>(m: &T) -> u32 {
+        Message::compute_size(m) as u32
     }
 
     fn new_snapshot(index: u64, term: u64, nodes: Vec<u64>, data: Vec<u8>) -> Snapshot {
